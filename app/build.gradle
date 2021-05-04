@@ -36,4 +36,8 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    //TSL Library
+    implementation project(':Rfid.AsciiProtocol-Library')
+    implementation project(':DeviceList')
+    implementation "androidx.constraintlayout:constraintlayout:2.0.4"
 }

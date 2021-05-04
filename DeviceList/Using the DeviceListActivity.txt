@@ -1,0 +1,100 @@
+How to use the DeviceListActivity
+---------------------------------
+
+Add the DeviceList project to the target project:
+
+	1) Copy the DeviceList project source to the target project's root folder
+	2) In Settings.gradle add:
+		
+		include ':DeviceList'
+
+Add a dependency for the DeviceListActivity project to the build.gradle file for the project:
+		
+	dependencies {
+
+		implementation project(':DeviceList')
+	}
+	
+	
+Device List Activity v2.0
+-------------------------
+
+The v2.0 Device List Activity works with the shared instance of the ReaderManager to allow Users to select a Reader to work with.
+
+The Device List activity presents a scrollable list of known Readers (with images) and an 'Add New' button to add additional (Bluetooth) Readers.
+Adding a new Bluetooth Reader uses the System Bluetooth pairing activity - upon returning from the system activity the newly paired Reader will appear in the list.
+
+The Activity is launched with the index of the Reader currently in use (if any) - this Reader will be highlighted in the list.
+A convenience constant is provided for the Intent request code (DeviceListActivity.SELECT_DEVICE_REQUEST)
+
+If no current Reader is supplied then tapping on any Reader in the list will cause the Activity to return indicating a DEVICE_CONNECT as the EXTRA_DEVICE_ACTION.
+
+When a selected Reader is present:
+
+    If the User taps on a different Reader then they will be asked to confrim that they wish to change readers.
+    If they confirm the change then the Activity returns indicating a DEVICE_CHANGE as the EXTRA_DEVICE_ACTION.
+
+    If the User taps on the current Reader they are asked if they wish to disconnect the Reader.
+    If they confirm the disconnect then the Activity returns indicating a DEVICE_DISCONNECT as the EXTRA_DEVICE_ACTION.
+
+
+The Device List Activity returns the EXTRA_DEVICE_INDEX of the Reader chosen by the User along with an EXTRA_DEVICE_ACTION indicating if this is a Disconnect, Connect or Change request.
+
+The following code illustrates how the sample projects invoke the DeviceList Activity (mReader is the instance of the Reader class currently in use)
+
+    int index = -1;
+    if( mReader != null )
+    {
+		// Determine the index of the current Reader
+        index = ReaderManager.sharedInstance().getReaderList().list().indexOf(mReader);
+    }
+    Intent selectIntent = new Intent(this, DeviceListActivity.class);
+    if( index >= 0 )
+    {
+        selectIntent.putExtra(EXTRA_DEVICE_INDEX, index);
+    }
+    startActivityForResult(selectIntent, DeviceListActivity.SELECT_DEVICE_REQUEST);
+
+
+The following code illustrates how the sample projects handle the result from the DeviceList Activity
+
+    //
+    // Handle Intent results
+    //
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        switch (requestCode) {
+            case DeviceListActivity.SELECT_DEVICE_REQUEST:
+                // When DeviceListActivity returns with a device to connect
+                if (resultCode == Activity.RESULT_OK)
+                {
+                    int readerIndex = data.getExtras().getInt(EXTRA_DEVICE_INDEX);
+                    Reader chosenReader = ReaderManager.sharedInstance().getReaderList().list().get(readerIndex);
+
+                    int action = data.getExtras().getInt(EXTRA_DEVICE_ACTION);
+
+                    // If already connected to a different reader then disconnect it
+                    if( mReader != null )
+                    {
+                        if( action == DeviceListActivity.DEVICE_CHANGE || action == DeviceListActivity.DEVICE_DISCONNECT)
+                        {
+                            appendMessage("Disconnecting from: " + mReader.getDisplayName() + "\n");
+                            mReader.disconnect();
+                            if(action == DeviceListActivity.DEVICE_DISCONNECT)
+                            {
+                                mReader = null;
+                            }
+                        }
+                    }
+
+                    // Use the Reader found
+                    if( action == DeviceListActivity.DEVICE_CHANGE || action == DeviceListActivity.DEVICE_CONNECT)
+                    {
+                        mReader = chosenReader;
+                        getCommander().setReader(mReader);
+                    }
+                }
+                break;
+        }
+    }
+

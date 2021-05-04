@@ -1,2 +1,4 @@
 include ':app'
 rootProject.name = "TSL RFID Bluetooth-Demo Project"
+include ':Rfid.AsciiProtocol-Library'
+include ':DeviceList'
