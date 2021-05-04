@@ -9,21 +9,33 @@ Downloaded RFID Scanner SDK from website:
 
 ## 2- Add the SDK Library in your project:
 i.      Copy the Rfid.AsciiProtocol-Library folder to your project folder.
+
 ii.     Add this line to the Settings.Gradle file
-            include ':Rfid.AsciiProtocol-Library'
+            
+	    include ':Rfid.AsciiProtocol-Library'
+	    
 iii.    Run a Gradle Sync
+
 iv.     The included Javadoc documentation can be associated with the library using the _Project _view.
+
 v.      Expand the 'External Libraries'
+
 vi.     Right-click the 'Gradle:artifacts:Rfid.AsciiProtocol-Library' item.
+
 vii.    Open the 'Library properties'
+
 viii.   Click the green +
+
 ix.     Navigate to the 'Rfid.AsciiProtocol-Library/doc' folder and click 'OK'
+
 x.      Run a Gradle Sync
 
 ## 3- Use the DeviceListActivity
 i.      Copy the DeviceList project source to the target project's root folder.
+
 ii.     In Settings.gradle add:
-		         include ':DeviceList'            
+		         
+			 include ':DeviceList'            
 iii.    Add a dependency for the DeviceListActivity project to the build.gradle file for the project:
 		        
             dependencies {
