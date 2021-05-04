@@ -1,0 +1,19 @@
+Version History
+---------------
+
+15/01/2020      Updated for new UHF products - 2166, 2128P, 2128L and branded variants
+                Added support for 2173 HF/LF Reader
+                Fixed bug where an ePop-Loq Reader would stay selected after it had been physically removed
+
+05/12/2018      New implementation for v2.0 SDK
+                More details are provided for each reader:
+                    the identity of the Reader and a description
+                    the available transports and their connection state are shown
+                    an image of the reader.
+                Adding New Readers now uses the System Pairing screen.
+
+----------------------------------------------------------------------------------------------------
+
+11/11/2014		Updated to ensure the Scan button is always visible and to include the number of items paired and discovered.
+
+19/11/2013		Initial Creation

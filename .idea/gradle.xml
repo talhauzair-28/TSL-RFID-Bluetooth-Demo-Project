@@ -11,6 +11,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/DeviceList" />
+            <option value="$PROJECT_DIR$/Rfid.AsciiProtocol-Library" />
             <option value="$PROJECT_DIR$/app" />
           </set>
         </option>
