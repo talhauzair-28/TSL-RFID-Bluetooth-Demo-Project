@@ -34,17 +34,17 @@ public class MainActivity extends AppCompatActivity implements TSLReaderAlertNot
 
     // The Reader currently in use
     private Reader mReader = null;
-
     // All of the reader inventory tasks are handled by this class
     private InventoryModel mModel;
-
     // The handler for model messages
     private static GenericHandler mGenericModelHandler;
 
     private boolean mIsSelectingReader = false;
+    private Button btnCheckConnection = null;
 
-    Button btnCheckConnection = null;
-
+    //----------------------------------------------------------------------------------------------
+    // Life cycle Events
+    //----------------------------------------------------------------------------------------------
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,24 +54,15 @@ public class MainActivity extends AppCompatActivity implements TSLReaderAlertNot
 
     }
 
-
-    //----------------------------------------------------------------------------------------------
-    // Pause & Resume life cycle
-    //----------------------------------------------------------------------------------------------
-
     @Override
     public synchronized void onPause() {
         super.onPause();
-
         mModel.setEnabled(false);
-
         // Unregister to receive notifications from the AsciiCommander
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mCommanderMessageReceiver);
-
         // Disconnect from the reader to allow other Apps to use it
         // unless pausing when USB device attached or using the DeviceListActivity to select a Reader
-        if( !mIsSelectingReader && !ReaderManager.sharedInstance().didCauseOnPause() && mReader != null )
-        {
+        if( !mIsSelectingReader && !ReaderManager.sharedInstance().didCauseOnPause() && mReader != null ) {
             mReader.disconnect();
         }
 
@@ -81,41 +72,31 @@ public class MainActivity extends AppCompatActivity implements TSLReaderAlertNot
     @Override
     public synchronized void onResume() {
         super.onResume();
-
         mModel.setEnabled(true);
-
         // Register to receive notifications from the AsciiCommander
         LocalBroadcastManager.getInstance(this).registerReceiver(mCommanderMessageReceiver, new IntentFilter(AsciiCommander.STATE_CHANGED_NOTIFICATION));
-
         // Remember if the pause/resume was caused by ReaderManager - this will be cleared when ReaderManager.onResume() is called
         boolean readerManagerDidCauseOnPause = ReaderManager.sharedInstance().didCauseOnPause();
-
         // The ReaderManager needs to know about Activity lifecycle changes
         ReaderManager.sharedInstance().onResume();
-
         // The Activity may start with a reader already connected (perhaps by another App)
         // Update the ReaderList which will add any unknown reader, firing events appropriately
         ReaderManager.sharedInstance().updateList();
-
         // Locate a Reader to use when necessary
         AutoSelectReader(!readerManagerDidCauseOnPause);
 
         mIsSelectingReader = false;
-
         displayReaderState();
     }
-
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
         // Remove observers for changes
         ReaderManager.sharedInstance().getReaderList().readerAddedEvent().removeObserver(mAddedObserver);
         ReaderManager.sharedInstance().getReaderList().readerUpdatedEvent().removeObserver(mUpdatedObserver);
         ReaderManager.sharedInstance().getReaderList().readerRemovedEvent().removeObserver(mRemovedObserver);
     }
-
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -125,9 +106,7 @@ public class MainActivity extends AppCompatActivity implements TSLReaderAlertNot
                 if (resultCode == Activity.RESULT_OK) {
                     int readerIndex = data.getExtras().getInt(EXTRA_DEVICE_INDEX);
                     Reader chosenReader = ReaderManager.sharedInstance().getReaderList().list().get(readerIndex);
-
                     int action = data.getExtras().getInt(EXTRA_DEVICE_ACTION);
-
                     // If already connected to a different reader then disconnect it
                     if (mReader != null) {
                         if (action == DeviceListActivity.DEVICE_CHANGE || action == DeviceListActivity.DEVICE_DISCONNECT) {
@@ -138,7 +117,6 @@ public class MainActivity extends AppCompatActivity implements TSLReaderAlertNot
                             }
                         }
                     }
-
                     // Use the Reader found
                     if (action == DeviceListActivity.DEVICE_CHANGE || action == DeviceListActivity.DEVICE_CONNECT) {
                         mReader = chosenReader;
@@ -150,26 +128,23 @@ public class MainActivity extends AppCompatActivity implements TSLReaderAlertNot
         }
     }
 
-    // Helper Methods:
+    //----------------------------------------------------------------------------------------------
+    // Helper Methods
+    //----------------------------------------------------------------------------------------------
 
     void initialize(){
         mGenericModelHandler = new GenericHandler(this);
-// Ensure the shared instance of AsciiCommander exists
+        // Ensure the shared instance of AsciiCommander exists
         AsciiCommander.createSharedInstance(getApplicationContext());
-
         AsciiCommander commander = getCommander();
-
         // Ensure that all existing responders are removed
         commander.clearResponders();
-
         // Add the LoggerResponder - this simply echoes all lines received from the reader to the log
         // and passes the line onto the next responder
         // This is added first so that no other responder can consume received lines before they are logged.
         commander.addResponder(new LoggerResponder());
-
         // Add a synchronous responder to handle synchronous commands
         commander.addSynchronousResponder();
-
         // Create the single shared instance for this ApplicationContext
         ReaderManager.create(getApplicationContext());
         // Add observers for changes
@@ -178,11 +153,13 @@ public class MainActivity extends AppCompatActivity implements TSLReaderAlertNot
         ReaderManager.sharedInstance().getReaderList().readerRemovedEvent().addObserver(mRemovedObserver);
 
         ReaderManager.sharedInstance().updateList();
+
         // Add observers for changes
-  /*      ReaderManager.sharedInstance().getReaderList().readerAddedEvent().addObserver(mAddedObserver);
+  /*    ReaderManager.sharedInstance().getReaderList().readerAddedEvent().addObserver(mAddedObserver);
         ReaderManager.sharedInstance().getReaderList().readerUpdatedEvent().addObserver(mUpdatedObserver);
         ReaderManager.sharedInstance().getReaderList().readerRemovedEvent().addObserver(mRemovedObserver);
-*/        //Create a (custom) model and configure its commander and handler
+  */
+        //Create a (custom) model and configure its commander and handler
         mModel = new InventoryModel();
         mModel.setCommander(getCommander());
         mModel.setHandler(mGenericModelHandler);
@@ -191,7 +168,6 @@ public class MainActivity extends AppCompatActivity implements TSLReaderAlertNot
 
     void setupUI(){
         btnCheckConnection = findViewById(R.id.btn_check_connection);
-
         btnCheckConnection.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -210,6 +186,7 @@ public class MainActivity extends AppCompatActivity implements TSLReaderAlertNot
             }
         });
     }
+
     void openDeviceListActivity(){
         int index = -1;
         if( mReader != null ) {
@@ -230,11 +207,9 @@ public class MainActivity extends AppCompatActivity implements TSLReaderAlertNot
     /**
      * @return the current AsciiCommander
      */
-    protected AsciiCommander getCommander()
-    {
+    protected AsciiCommander getCommander() {
         return AsciiCommander.sharedInstance();
     }
-
     //
     // Handle the messages broadcast from the AsciiCommander
     //
@@ -242,33 +217,25 @@ public class MainActivity extends AppCompatActivity implements TSLReaderAlertNot
         @Override
         public void onReceive(Context context, Intent intent) {
           //  if (D) { Log.d(getClass().getName(), "AsciiCommander state changed - isConnected: " + getCommander().isConnected()); }
-
             String connectionStateMsg = intent.getStringExtra(AsciiCommander.REASON_KEY);
-
             displayReaderState();
-            if( getCommander().isConnected() )
-            {
+            if( getCommander().isConnected() ) {
                 // Update for any change in power limits
                 //setPowerBarLimits();
                 // This may have changed the current power level setting if the new range is smaller than the old range
                 // so update the model's inventory command for the new power value
-               // mModel.getCommand().setOutputPower(mPowerLevel);
-
+                // mModel.getCommand().setOutputPower(mPowerLevel);
                 mModel.resetDevice();
                 mModel.updateConfiguration();
             }
-
             displayReaderState();
             //UpdateUI();
-
         }
     };
 
     private void displayReaderState() {
-
         String connectionMsg = "Reader: ";
-        switch( getCommander().getConnectionState())
-        {
+        switch( getCommander().getConnectionState()) {
             case CONNECTED:
                 connectionMsg += getCommander().getConnectedDeviceName();
                 break;
@@ -281,6 +248,7 @@ public class MainActivity extends AppCompatActivity implements TSLReaderAlertNot
         Log.e("Talha:", "Reader "+ connectionMsg);
         setTitle(connectionMsg);
     }
+
     //----------------------------------------------------------------------------------------------
     // TSLReader message handling
     //----------------------------------------------------------------------------------------------
@@ -303,6 +271,7 @@ public class MainActivity extends AppCompatActivity implements TSLReaderAlertNot
     //----------------------------------------------------------------------------------------------
     // ReaderList Observers
     //----------------------------------------------------------------------------------------------
+
     Observable.Observer<Reader> mAddedObserver = new Observable.Observer<Reader>()
     {
         @Override
@@ -313,22 +282,16 @@ public class MainActivity extends AppCompatActivity implements TSLReaderAlertNot
         }
     };
 
-    Observable.Observer<Reader> mUpdatedObserver = new Observable.Observer<Reader>()
-    {
+    Observable.Observer<Reader> mUpdatedObserver = new Observable.Observer<Reader>() {
         @Override
-        public void update(Observable<? extends Reader> observable, Reader reader)
-        {
+        public void update(Observable<? extends Reader> observable, Reader reader) {
             // Was the current Reader disconnected i.e. the connected transport went away or disconnected
-            if( reader == mReader && !reader.isConnected() )
-            {
+            if( reader == mReader && !reader.isConnected() ) {
                 // No longer using this reader
                 mReader = null;
-
                 // Stop using the old Reader
                 getCommander().setReader(mReader);
-            }
-            else
-            {
+            } else {
                 // See if this updated Reader should be used
                 // e.g. the Reader's USB transport connected
                 AutoSelectReader(true);
@@ -336,61 +299,45 @@ public class MainActivity extends AppCompatActivity implements TSLReaderAlertNot
         }
     };
 
-    Observable.Observer<Reader> mRemovedObserver = new Observable.Observer<Reader>()
-    {
+    Observable.Observer<Reader> mRemovedObserver = new Observable.Observer<Reader>() {
         @Override
-        public void update(Observable<? extends Reader> observable, Reader reader)
-        {
+        public void update(Observable<? extends Reader> observable, Reader reader) {
             // Was the current Reader removed
-            if( reader == mReader)
-            {
+            if( reader == mReader) {
                 mReader = null;
-
                 // Stop using the old Reader
                 getCommander().setReader(mReader);
             }
         }
     };
 
-
-    private void AutoSelectReader(boolean attemptReconnect)
-    {
+    private void AutoSelectReader(boolean attemptReconnect) {
         ObservableReaderList readerList = ReaderManager.sharedInstance().getReaderList();
         Reader usbReader = null;
-        if( readerList.list().size() >= 1)
-        {
+        if( readerList.list().size() >= 1) {
             // Currently only support a single USB connected device so we can safely take the
             // first CONNECTED reader if there is one
-            for (Reader reader : readerList.list())
-            {
-                if (reader.hasTransportOfType(TransportType.USB))
-                {
+            for (Reader reader : readerList.list()) {
+                if (reader.hasTransportOfType(TransportType.USB)) {
                     usbReader = reader;
                     break;
                 }
             }
         }
 
-        if( mReader == null )
-        {
-            if( usbReader != null)
-            {
+        if( mReader == null ) {
+            if( usbReader != null) {
                 // Use the Reader found, if any
                 mReader = usbReader;
                 getCommander().setReader(mReader);
             }
-        }
-        else
-        {
+        } else {
             // If already connected to a Reader by anything other than USB then
             // switch to the USB Reader
             IAsciiTransport activeTransport = mReader.getActiveTransport();
-            if ( activeTransport != null && activeTransport.type() != TransportType.USB && usbReader != null)
-            {
+            if ( activeTransport != null && activeTransport.type() != TransportType.USB && usbReader != null) {
                 mReader.disconnect();
-
                 mReader = usbReader;
-
                 // Use the Reader found, if any
                 getCommander().setReader(mReader);
             }
@@ -399,18 +346,13 @@ public class MainActivity extends AppCompatActivity implements TSLReaderAlertNot
         // Reconnect to the chosen Reader
         if( mReader != null
                 && !mReader.isConnecting()
-                && (mReader.getActiveTransport()== null || mReader.getActiveTransport().connectionStatus().value() == ConnectionState.DISCONNECTED))
-        {
+                && (mReader.getActiveTransport()== null || mReader.getActiveTransport().connectionStatus().value() == ConnectionState.DISCONNECTED)) {
             // Attempt to reconnect on the last used transport unless the ReaderManager is cause of OnPause (USB device connecting)
-            if( attemptReconnect )
-            {
-                if( mReader.allowMultipleTransports() || mReader.getLastTransportType() == null )
-                {
+            if( attemptReconnect ) {
+                if( mReader.allowMultipleTransports() || mReader.getLastTransportType() == null ) {
                     // Reader allows multiple transports or has not yet been connected so connect to it over any available transport
                     mReader.connect();
-                }
-                else
-                {
+                } else {
                     // Reader supports only a single active transport so connect to it over the transport that was last in use
                     mReader.connect(mReader.getLastTransportType());
                 }

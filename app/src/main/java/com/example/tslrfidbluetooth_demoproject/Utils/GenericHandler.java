@@ -14,8 +14,7 @@ public class GenericHandler extends WeakHandler<TSLReaderAlertNotifier>
     }
 
     @Override
-    public void handleMessage(Message msg, TSLReaderAlertNotifier receiver)
-    {
+    public void handleMessage(Message msg, TSLReaderAlertNotifier receiver) {
         try {
             switch (msg.what) {
                 case ModelBase.BUSY_STATE_CHANGED_NOTIFICATION:
@@ -27,7 +26,7 @@ public class GenericHandler extends WeakHandler<TSLReaderAlertNotifier>
                     String message = (String)msg.obj;
                     if( message.startsWith("ER:")) {
                       //RFID CODE  receiver.mResultTextView.setText( message.substring(3));
-                        receiver.RFIDCodeMessageReceived(message.substring(3));
+                        receiver.unknownMessageReceived(message.substring(3));
                     }
                     else if( message.startsWith("BC:")) {
                      // BARCODE   receiver.mBarcodeResultsArrayAdapter.add(message);
@@ -35,7 +34,7 @@ public class GenericHandler extends WeakHandler<TSLReaderAlertNotifier>
 
                     } else {
                       //UNKNOWN MESSAGGE  receiver.mResultsArrayAdapter.add(message);
-                        receiver.unknownMessageReceived(message);
+                        receiver.RFIDCodeMessageReceived(message);
                     }
                     break;
 
@@ -44,6 +43,6 @@ public class GenericHandler extends WeakHandler<TSLReaderAlertNotifier>
             }
         } catch (Exception e) {
         }
-
     }
+
 };

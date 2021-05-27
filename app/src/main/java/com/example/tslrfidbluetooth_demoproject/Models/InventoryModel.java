@@ -21,7 +21,6 @@ import java.util.Locale;
 
 public class InventoryModel extends ModelBase
 {
-
 	// Control 
 	private boolean mAnyTagSeen;
 	private boolean mEnabled;
@@ -122,8 +121,6 @@ public class InventoryModel extends ModelBase
 				sendMessageNotification("BC: " + barcode);
 			}
 		});
-
-	
 	}
 
 	//
@@ -161,7 +158,6 @@ public class InventoryModel extends ModelBase
 			getCommander().executeCommand(mInventoryCommand);
 		}
 	}
-
 
 	//
 	// Test for the presence of the antenna
