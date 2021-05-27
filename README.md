@@ -104,4 +104,10 @@ v. Please note, there might be a few changes you need to make in DeviceListActiv
               ReaderManager.create(getApplicationContext());
               
 ## 4- Implementing our Demo Project Activity
-We will start working on MainActivity.java
+#### MainActivity.java
+- Connect to TSL RFID Reader
+	- Connect with already paired device
+	- Pair with new TSL otherwise
+
+- Start receiving values in our callbacks
+	- Implementation of _TSLReaderAlertNotifier_
