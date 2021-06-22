@@ -14,21 +14,28 @@ ii.     Add this line to the Settings.Gradle file
             
 	    include ':Rfid.AsciiProtocol-Library'
 	    
-iii.    Run a Gradle Sync
+iii.    Add a dependency for the DeviceListActivity project to the build.gradle file for the project:
+		        
+        dependencies {
+		//...
+		implementation project(':Rfid.AsciiProtocol-Library')
+	    }
+	    
+iv.    Run a Gradle Sync
 
-iv.     The included Javadoc documentation can be associated with the library using the _Project _view.
+v.     The included Javadoc documentation can be associated with the library using the _Project _view.
 
-v.      Expand the 'External Libraries'
+vi.      Expand the 'External Libraries'
 
-vi.     Right-click the 'Gradle:artifacts:Rfid.AsciiProtocol-Library' item.
+vii.     Right-click the 'Gradle:artifacts:Rfid.AsciiProtocol-Library' item.
 
-vii.    Open the 'Library properties'
+viii.    Open the 'Library properties'
 
-viii.   Click the green +
+ix.   Click the green +
 
-ix.     Navigate to the 'Rfid.AsciiProtocol-Library/doc' folder and click 'OK'
+x.     Navigate to the 'Rfid.AsciiProtocol-Library/doc' folder and click 'OK'
 
-x.      Run a Gradle Sync
+xi.      Run a Gradle Sync
 
 ## 3- Use the DeviceListActivity
 i.      Copy the DeviceList project source to the target project's root folder.
